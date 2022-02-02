@@ -1,0 +1,77 @@
+var propertyValue = gs.getProperty('your.property.name.here');	//Return the value of the ‘your.property.name.here’ system property
+			(or)
+var rec = new GlideRecord(‘sys_properties’);
+rec.addQuery(‘name’, ‘your.property.name.here’);    //system property 
+rec.query();
+if(rec.next()){
+var yourPropertyValue = rec.value;
+}
+-------------------------------------------------------
+var gr=new GlideRecord('x_att2_sdm_transfo_pmac');
+gr.addQuery('state',10);
+gr.query();
+while(gr.next()){
+gs.info(gr.number);
+}
+---------------------------------------------------
+The following sample script adds a request.commented event with the user's Sys ID as parm1 and the user's user name for parm2.
+https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/platform-events/task/t_CreateYourOwnEvent.html
+
+if (current.operation() != 'insert' && current.comments.changes()) {
+gs.eventQueue('request.commented', current, gs.getUserID(), gs.getUserName());
+}
+--------------------------------------------------------
+
+(function execute(inputs, outputs) {
+// ... code ...
+  
+ var gr = new GlideRecord('task_sla');
+  if(gr.get(inputs.taskRecordObject)) {
+    	var caseobject = gr ;
+  		//var assignedto = gr.assigned_to ;
+ // gs.eventQueue(inputs.eventname, inputs.eventrecord, inputs.parm1, inputs.parm1);
+  
+ gs.eventQueue('x_att2_sdm_transfo.sdm.sla.warning', caseobject);
+ 			}
+})(inputs, outputs);
+
+--------------------------------------------------
+UI action
+ACtion name --- reassign_case
+onclick -- reassign()
+condition -- (current.sys_class_name == 'x_att2_sdm_transfo_lmac' || current.sys_class_name == 'x_att2_sdm_transfo_pmac' || current.sys_class_name == 'x_att2_sdm_transfo_project') && current.state != 1 &&current .active==true
+function reassign(){
+	if(g_form.getValue('comments') == ''){
+		g_form.setMandatory('comments', true);
+		g_form.addErrorMessage('Please update comments');
+		g_form.showFieldMsg('comments','Comments are mandatory when re-assigning a Case.','error');
+	}
+	gsftSubmit(null, g_form.getFormElement(), 'reassign_case');
+   
+}
+	if(typeof window == 'undefined')
+		serverReopen();
+
+function serverReopen(){ 
+    current.state= 1;
+	current.assigned_to= '';
+	current.update();
+	action.setRedirectURL(current);
+		
+	}
+-----------------------------------------------------------
+decode base64
+
+
+2. Using GlideStringUtil.base64DecodeAsBytes(base64File):
+
+var base64File= "JA....XX" //The huge base64Encoded string
+
+var DecodedBytes = GlideStringUtil.base64DecodeAsBytes(base64File); //Decodes the base64Encoded Data in Bytes.
+
+
+var attach = new GlideSysAttachment();
+
+attach.write(gr_record, file_name, contentType, DecodedBytes );
+
+//Accepts 4 parameters: 1. GlideRecord object, Filename(Eg: Test.pdf), Content Type(Eg: application/pdf), DecodedByte
